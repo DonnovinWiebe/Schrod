@@ -2,5 +2,8 @@
 name = "schrod"
 version = "1.0.0"
 edition = "2024"
+license = "MIT"
+description = "A custom (very opinionated) error handling package that traces errors through a call stack."
+repository = "https://github.com/DonnovinWiebe/Schrod"
 
 [dependencies]
