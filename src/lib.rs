@@ -213,23 +213,5 @@ impl Trace {
         let mut propagated_messages = self.messages.clone();
         propagated_messages.push(new_message.to_string());
         Trace { messages: propagated_messages }
-    }
-
-    // todo: this is never used. remove if not needed
-    /*
-    /// Returns a new `Trace` object with the given messages added to the end.
-    #[must_use]
-    fn continued_from_list(&self, new_messages: Vec<String>) -> Trace {
-        let mut propagated_messages = self.messages.clone();
-
-        if new_messages.is_empty() {
-            propagated_messages.push("Failed with no failure messages.".to_string());
-        }
-        else {
-            for message in new_messages { propagated_messages.push(message.clone()); }
-        }
-
-        Trace { messages: propagated_messages }
-    }
-    */    
+    }  
 }
