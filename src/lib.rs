@@ -54,7 +54,21 @@ impl<T> Schrod<T> {
                 Fail(Trace::new_from_list(messages))
             }
             
-            Fail(stack) => { Fail(stack.continued(&format!("{function_name}: {message}"))) }
+            Fail(trace) => { Fail(trace.continued(&format!("{function_name}: {message}"))) }
+        }
+    }
+
+    /// Flags a `Fail` to be silent.
+    /// If this is called on a `Pass`, a new `Fail` is created.
+    #[must_use]
+    pub fn silence(&self, function_name: &str) -> Schrod<T> {
+        match self {
+            Pass(_) => {
+                let messages = vec![format!("Silenced a Pass in {function_name}.")];
+                Fail(Trace::new_from_list(messages).silenced())
+            }
+
+            Fail(trace) => { Fail(trace.silenced()) }
         }
     }
     
@@ -64,7 +78,7 @@ impl<T> Schrod<T> {
     pub fn convert<U>(&self, function_name: &str) -> Schrod<U> {
         match self {
             Pass(_) => Schrod::new_fail("Converted Pass to a Fail.", function_name),
-            Fail(stack) => Fail(stack.clone()),
+            Fail(trace) => Fail(trace.clone()),
         }
     }
 
@@ -74,8 +88,8 @@ impl<T> Schrod<T> {
         match result {
             Ok(value) => { Pass(value) }
             Err(err) => {
-                let result_stack = Schrod::new_fail(&err.to_string(), function_name);
-                result_stack.fail(possible_failure_message, function_name)
+                let result = Schrod::new_fail(&err.to_string(), function_name);
+                result.fail(possible_failure_message, function_name)
             }
         }
     }
@@ -85,8 +99,8 @@ impl<T> Schrod<T> {
     pub fn from_option(option: Option<T>, possible_failure_message: &str, function_name: &str) -> Schrod<T> {
         if let Some(value) = option { Pass(value) }
         else {
-            let result_stack = Schrod::new_fail("Received a None value.", function_name);
-            result_stack.fail(possible_failure_message, function_name)
+            let result = Schrod::new_fail("Received a None value.", function_name);
+            result.fail(possible_failure_message, function_name)
         }
     }
 
@@ -130,7 +144,7 @@ impl<T> Schrod<T> {
     pub fn results(&self) -> Vec<String> {
         match self {
             Pass(_) => { vec!["Pass".to_string()] }
-            Fail(stack) => { stack.messages.clone() }
+            Fail(trace) => { trace.messages() }
         }
     }
     
@@ -194,6 +208,9 @@ pub struct Trace {
     messages: Vec<String>,
 }
 impl Trace {
+    /// Used to flag if a `Trace` is meant to hold information for a silent error.
+    const SILENT_FLAG: &'static str = "*silent*";
+    
     /// Creates a new `Trace` object from a single message.
     #[must_use]
     fn new(initial_message: &str) -> Trace {
@@ -213,5 +230,21 @@ impl Trace {
         let mut propagated_messages = self.messages.clone();
         propagated_messages.push(new_message.to_string());
         Trace { messages: propagated_messages }
-    }  
+    }
+
+    /// Returns a new `Trace` that has been flagged as silent.
+    /// This is useful for differentiating non-critical errors that do not have to fail or warn loudly.
+    #[must_use]
+    fn silenced(&self) -> Trace {
+        self.continued(Trace::SILENT_FLAG)
+    }
+
+    /// Gets the messages from the given `Trace` without any silent flags.
+    #[must_use]
+    fn messages(&self) -> Vec<String> {
+        self.messages.clone()
+            .into_iter()
+            .filter(|m| m != Trace::SILENT_FLAG)
+            .collect()
+    }
 }
