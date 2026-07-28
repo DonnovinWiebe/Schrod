@@ -198,6 +198,16 @@ impl<T> Schrod<T> {
             Fail(_) => true,
         }
     }
+
+    /// Checks if the given `Schrod` is silenced.
+    /// If this is used on a `Pass` value, `false` is returned.
+    #[must_use]
+    pub fn is_silenced(&self) -> bool {
+        match self {
+            Pass(_) => false,
+            Fail(trace) => trace.is_silenced()
+        }
+    }
 }
 
 
@@ -237,6 +247,16 @@ impl Trace {
     #[must_use]
     fn silenced(&self) -> Trace {
         self.continued(Trace::SILENT_FLAG)
+    }
+
+    /// Checks if the given `Trace` is silenced.
+    #[must_use]
+    fn is_silenced(&self) -> bool {
+        for messege in &self.messages {
+            if messege == Trace::SILENT_FLAG { return true }
+        }
+        
+        false
     }
 
     /// Gets the messages from the given `Trace` without any silent flags.
