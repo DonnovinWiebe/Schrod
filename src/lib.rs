@@ -219,7 +219,7 @@ pub struct Trace {
 }
 impl Trace {
     /// Used to flag if a `Trace` is meant to hold information for a silent error.
-    const SILENT_FLAG: &'static str = "*silent*";
+    const SILENT_FLAG: &'static str = "*SILENT*";
     
     /// Creates a new `Trace` object from a single message.
     #[must_use]
@@ -253,7 +253,7 @@ impl Trace {
     #[must_use]
     fn is_silenced(&self) -> bool {
         for messege in &self.messages {
-            if messege == Trace::SILENT_FLAG { return true }
+            if messege.contains(Trace::SILENT_FLAG) { return true }
         }
         
         false
