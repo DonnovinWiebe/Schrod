@@ -264,7 +264,7 @@ impl Trace {
     fn messages(&self) -> Vec<String> {
         self.messages.clone()
             .into_iter()
-            .filter(|m| m.contains(Trace::SILENT_FLAG))
+            .filter(|m| !m.contains(Trace::SILENT_FLAG))
             .collect()
     }
 }
