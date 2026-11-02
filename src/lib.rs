@@ -1,10 +1,10 @@
 use std::{future::{IntoFuture, Ready, ready}, process::{ExitCode, Termination}};
-
+use serde::{Deserialize, Serialize};
 use crate::Schrod::{Fail, Pass};
 
 /// A custom result type to help track errors through their corresponding call stacks.
 /// The name comes from Schrödinger's cat, a thought experiment that illustrates the uncertainty of a measurement until examined.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum Schrod<T> {
     Pass(T),
     Fail(Trace),
@@ -213,7 +213,7 @@ impl<T> Schrod<T> {
 
 
 /// Used to track errors through a call stack.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Trace {
     messages: Vec<String>,
 }
